@@ -1,0 +1,16 @@
+<html>
+    <head>
+        <title>Earthquakes</title>
+    </head>
+    
+    <body>
+        <h1>Yesterday's Earthquakes</h1>
+        {% for feature in features %}
+            <b>{{feature.properties.title}}</b>&nbsp;@&nbsp;
+            {{isodate(feature.properties.time)}}<br />
+            <a href="{{feature.properties.url}}">{{feature.properties.place}}</a><br />
+            Location: {{coordinates(feature.geometry.coordinates)}}<br />
+            <hr />
+        {% endfor %}
+    </body>
+</html>
