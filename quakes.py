@@ -2,34 +2,19 @@ from flask import Flask, render_template
 import json
 from datetime import datetime
 import urllib2
+from earthquake import Earthquake
 
 USGS_PAST_DAY_URL = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson"
+#USGS_PAST_DAY_URL = "file:all_day.geojson"
 
 def load_earthquake_data():
     fp = urllib2.urlopen(USGS_PAST_DAY_URL)
     data = fp.read()
     if not data:
         return None
-    quakes = json.loads(data)
+    quakes_json = json.loads(data)
+    quakes =  [Earthquake(f) for f in quakes_json['features']]
     return quakes
- 
-def sort_by_mag(recA, recB):
-    '''
-    Compares the magintudes of two records and returns value based on one
-    being less than, equal to, or greater than the other
-    
-    Note the comparisons are done reversed so that the larger magnitude will
-    precede the lesser.
-    '''
-    
-    magA = recA['properties']['mag']
-    magB = recB['properties']['mag']
-    if magA > magB:
-        return -1
-    elif magA < magB:
-        return 1
-    else:
-        return 0
         
 app = Flask(__name__)
 
@@ -39,18 +24,19 @@ def get_quakes():
     #print quakes['features']
     if quakes is None:
         return
-    
-    features = sorted(quakes['features'],cmp=sort_by_mag)
-    return render_template('quakes.html', features=features)
+
+    quakes.sort( reverse=True, key=lambda r:r.magnitude )
+   
+    return render_template('quakes.html', earthquakes=quakes)
 
 @app.context_processor
 def my_utility_processor():
     def isodate(ts_in_msec):
-        return datetime.fromtimestamp(int(ts_in_msec)/1000.).isoformat()
+        return msecs_to_isodate(ts_in_msec)
     
     def coordinates(geo):
-        lat,lon,depth = geo
-        return dict(latitude=lat, longitude=lon)
+        lon,lat,depth = geo
+        return "{:8.3f} {:7.3f}".format(lon,lat)
         
     return dict(isodate=isodate, coordinates=coordinates)
     

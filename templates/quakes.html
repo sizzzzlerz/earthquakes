@@ -1,16 +1,46 @@
 <html>
     <head>
-        <title>Earthquakes</title>
-    </head>
+        <title>Previous Day's Earthquakes</title>
+        <style>
+            th,td { font-size: 11pt; }
+            table { border-collapse: collapse; }
+            table, th, td { border: 1px solid black; }
+            td { padding:4px; }
+            tr:nth-child(even){background-color: #f2f2f2}
+            pre {font-family: Menlo,Consolas,monospace, font-size:9px;}
+            .notfirst:hover {background-color: #ffff99;}
+            .right { text-align: right; }
+            .center { text-align: center; }
+        </style>
+        <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.15/css/jquery.dataTables.css"> 
+        <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.15/js/jquery.dataTables.js">
+
+        $(document).ready( function () {
+            $('#table_id').DataTable();
+        } );
+        </script>
+        </head>
     
     <body>
         <h1>Yesterday's Earthquakes</h1>
-        {% for feature in features %}
-            <b>{{feature.properties.title}}</b>&nbsp;@&nbsp;
-            {{isodate(feature.properties.time)}}<br />
-            <a href="{{feature.properties.url}}">{{feature.properties.place}}</a><br />
-            Location: {{coordinates(feature.geometry.coordinates)}}<br />
-            <hr />
-        {% endfor %}
+        <table id="table_id">
+            <tr>
+                <th>Time &#x25b2;</th>
+                <th class="center">Magnitude &#x25bc;</th>
+                <th>Place</th>
+                <th>Longitude</th>
+                <th>Latitude</th>
+            </tr>
+            {% for eq in earthquakes %}
+                <tr class="notfirst">
+                <td class="center">{{eq.time}}</td>
+                <td class="center">{{'%0.2f' % eq.magnitude|float}}</td>
+                <td><a href="{{eq.url}}" target="_blank">
+                        {{eq.place}}</a></td>
+                <td class="right">{{'%0.3f' % eq.longitude|float}}</td>
+                <td class="right">{{'%0.3f' % eq.latitude|float}}</td>
+                </tr>
+            {% endfor %}
+        </table>
     </body>
 </html>
